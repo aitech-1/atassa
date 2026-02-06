@@ -614,6 +614,7 @@ gmd(
     } = repoData;
     const messageText = `Hello *_${pushName}_,*\nThis is *${botName},* A Whatsapp Bot Built by *${ownerName},* Enhanced with Amazing Features to Make Your Whatsapp Communication and Interaction Experience Amazing\n\n*❲❒❳ ɴᴀᴍᴇ:* ${name}\n*❲❒❳ sᴛᴀʀs:* ${stargazers_count}\n*❲❒❳ ғᴏʀᴋs:* ${forks_count}\n*❲❒❳ ᴄʀᴇᴀᴛᴇᴅ ᴏɴ:* ${new Date(created_at).toLocaleDateString()}\n*❲❒❳ ʟᴀsᴛ ᴜᴘᴅᴀᴛᴇᴅ:* ${new Date(updated_at).toLocaleDateString()}`;
 
+    const dateNow = Date.now();
     await sendButtons(Gifted, from, {
       title: "",
       text: messageText,
@@ -633,8 +634,52 @@ gmd(
             url: `https://github.com/${giftedRepo}`,
           }),
         },
+        {
+          id: `repo_dl_${dateNow}`,
+          text: "📥 Download Zip",
+        },
       ],
     });
+
+    const handleResponse = async (event) => {
+      const messageData = event.messages[0];
+      if (!messageData?.message) return;
+
+      const templateButtonReply =
+        messageData.message?.templateButtonReplyMessage;
+      if (!templateButtonReply) return;
+
+      const selectedButtonId = templateButtonReply.selectedId;
+      if (!selectedButtonId?.includes(`repo_dl_${dateNow}`)) return;
+
+      const isFromSameChat = messageData.key?.remoteJid === from;
+      if (!isFromSameChat) return;
+
+      try {
+        const zipUrl = `https://github.com/${giftedRepo}/archive/refs/heads/main.zip`;
+        await Gifted.sendMessage(
+          from,
+          {
+            document: { url: zipUrl },
+            fileName: `${name}.zip`,
+            mimetype: "application/zip",
+          },
+          { quoted: messageData },
+        );
+        await react("✅");
+      } catch (dlErr) {
+        await Gifted.sendMessage(from, { text: "Failed to download repo zip: " + dlErr.message }, { quoted: messageData });
+      }
+
+      Gifted.ev.off("messages.upsert", handleResponse);
+    };
+
+    Gifted.ev.on("messages.upsert", handleResponse);
+    setTimeout(
+      () => Gifted.ev.off("messages.upsert", handleResponse),
+      120000,
+    );
+
     await react("✅");
   },
 );
