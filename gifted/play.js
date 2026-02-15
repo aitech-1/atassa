@@ -70,7 +70,7 @@ gmd(
 
     try {
       const buffer = await gmdBuffer(q);
-      const convertedBuffer = await formatVideo(buffer);
+    //  const convertedBuffer = await formatVideo(buffer);
       if (buffer instanceof Error) {
         await react("❌");
         return reply("Failed to download the video file.");
@@ -78,7 +78,7 @@ gmd(
       await Gifted.sendMessage(
         from,
         {
-          document: convertedBuffer,
+          document: buffer,
           fileName: "Video.mp4",
           mimetype: "video/mp4",
           caption: `> *${botFooter}*`,
@@ -186,8 +186,7 @@ gmd(
         await reply("File is large, processing might take a while...");
       }
 
-      // const convertedBuffer = await formatAudio(bufferRes);
-      const convertedBuffer = bufferRes;
+      const convertedBuffer = await formatAudio(bufferRes);
       
       const dateNow = Date.now();
       const buttonId = `play_${firstVideo.id}_${dateNow}`;
