@@ -531,6 +531,8 @@ gmd(
         exec: require("node:child_process").exec,
         spawn: require("node:child_process").spawn,
         moment: require("moment-timezone"),
+        sendButtons: require("gifted-btns"),
+        sendInteractiveMessage: require("gifted-btns"),
         groupCache,
         getGroupMetadata,
         cachedGroupMetadata,
